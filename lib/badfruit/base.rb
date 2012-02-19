@@ -1,15 +1,18 @@
 module BadFruit
   class Base
     attr_accessor :api_key
+    attr_accessor :defaults
     API_VERSION = "v1.0"
     MOVIE_DETAIL_BASE_URL = "http://api.rottentomatoes.com/api/public/#{API_VERSION}/movies"
     LISTS_DETAIL_BASE_URL = "http://api.rottentomatoes.com/api/public/#{API_VERSION}/lists"
+    OPTIONS_FOR_LISTS = [:country, :page_limit]
     
     def movies(); @movie || BadFruit::Movies.new(self); end
     def lists(); @list || BadFruit::Lists.new(self); end
     
-    def initialize(key)
+    def initialize(key, defaults)
       @api_key = key
+      @defaults = defaults
       @@base_api_url = "http://api.rottentomatoes.com/api/public/#{API_VERSION}"
       @@movies_query_url = "#{@@base_api_url}/movies.json?apikey=#{@api_key}"
       @@lists_query_url = "#{@@base_api_url}/lists.json?apikey=#{@api_key}"
@@ -49,13 +52,13 @@ module BadFruit
       when "new_releases"
         url = "#{LISTS_DETAIL_BASE_URL}/dvds/new_releases.json?apikey=#{@api_key}"
       when "opening"
-        url = "#{LISTS_DETAIL_BASE_URL}/movies/opening.json?apikey=#{@api_key}"
+        url = "#{LISTS_DETAIL_BASE_URL}/movies/opening.json?apikey=#{@api_key}#{options_for_lists}"
       when "upcoming"
-        url = "#{LISTS_DETAIL_BASE_URL}/movies/upcoming.json?apikey=#{@api_key}"
+        url = "#{LISTS_DETAIL_BASE_URL}/movies/upcoming.json?apikey=#{@api_key}#{options_for_lists}"
       when "in_theaters"
-        url = "#{LISTS_DETAIL_BASE_URL}/movies/in_theaters.json?apikey=#{@api_key}"
+        url = "#{LISTS_DETAIL_BASE_URL}/movies/in_theaters.json?apikey=#{@api_key}#{options_for_lists}"
       when "current_releases"
-        url = "#{LISTS_DETAIL_BASE_URL}/dvds/current_releases.json?apikey=#{@api_key}"
+        url = "#{LISTS_DETAIL_BASE_URL}/dvds/current_releases.json?apikey=#{@api_key}#{options_for_lists}"
       else
         puts "Not a valid action"
         return
@@ -91,6 +94,13 @@ module BadFruit
          actorsArray.push(Actor.new(actor))
        end
        return actorsArray
+    end
+
+    def options_for_lists
+      query_string = @defaults.select { |option, value| OPTIONS_FOR_LISTS.include? option } \
+        .map { |option, value| "#{option.to_s}=#{value}" } \
+        .join('&')
+      return query_string.empty? ? '' : "&#{query_string}"
     end
   end
 end

@@ -12,7 +12,7 @@ require File.join(File.expand_path(File.dirname(__FILE__)), 'badfruit', 'Posters
 require File.join(File.expand_path(File.dirname(__FILE__)), 'badfruit', 'Scores', 'scores')
 
 module BadFruit
-  def self.new(apikey)
-    BadFruit::Base.new(apikey)
+  def self.new(apikey, defaults = {})
+    BadFruit::Base.new(apikey, defaults)
   end
 end
